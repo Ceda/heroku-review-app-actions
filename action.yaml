@@ -24,6 +24,10 @@ inputs:
     description: "Set up the initial build using app.json. For more info: https://devcenter.heroku.com/articles/setting-up-apps-using-the-heroku-platform-api"
     default: false
     required: false
+  overrides:
+    description: "Overrides for app-setup https://devcenter.heroku.com/articles/platform-api-reference#app-setup"
+    default: "{}"
+    required: false
 outputs:
   url:
     description: "The URL for the app"
@@ -119,7 +123,7 @@ runs:
       run: |
         export SOURCE_GET_URL=$(echo ${{ toJSON(steps.source_endpoint.outputs.SOURCE_ENDPOINT) }} | jq -r '.get')
         export OUTPUT_STREAM_URL=$(curl -X POST https://api.heroku.com/apps/$APP_NAME/builds \
-        -d '{"source_blob":{"url":"'"$SOURCE_GET_URL"'", "version": "'"${{ github.event.pull_request.head.sha }}"'"}}' \
+        -d '{"source_blob":{"url":"'"$SOURCE_GET_URL"'", "version": "'"${{ github.event.pull_request.head.sha }}"'"},"overrides": "'"${{ github.inputs.overrides }}"'"}' \
         -H 'Accept: application/vnd.heroku+json; version=3' \
         -H "Content-Type: application/json" \
         -H "Authorization: Bearer ${{ inputs.api-key }}" | \
