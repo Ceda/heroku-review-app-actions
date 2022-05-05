@@ -104,17 +104,15 @@ runs:
       shell: bash
       run: |
         export SOURCE_GET_URL=$(echo ${{ toJSON(steps.source_endpoint.outputs.SOURCE_ENDPOINT) }} | jq -r '.get')
-        export SOURCE_BLOB='{
+        curl -v -X POST https://api.heroku.com/app-setups \
+        -d '{
         "source_blob": {"url": "'"$SOURCE_GET_URL"'", "version": "'"${{ github.event.pull_request.head.sha }}"'"},
         "app": {
           "name": "'"$APP_NAME"'",
           "region": "${{ inputs.region }}",
           "organization": "${{ inputs.team }}"
         },"overrides": "'"${{ inputs.overrides }}"'"
-        }'
-        echo $SOURCE_BLOB
-        curl -X POST https://api.heroku.com/app-setups \
-        -d  $SOURCE_BLOB \
+        }' \
         -H "Content-Type: application/json" \
         -H "Accept: application/vnd.heroku+json; version=3" \
         -H "Authorization: Bearer ${{ inputs.api-key }}"
