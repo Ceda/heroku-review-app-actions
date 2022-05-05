@@ -27,10 +27,9 @@ inputs:
     description: "Set up the initial build using app.json. For more info: https://devcenter.heroku.com/articles/setting-up-apps-using-the-heroku-platform-api"
     default: false
     required: false
-  overrides:
-    description: "Overrides for app-setup https://devcenter.heroku.com/articles/platform-api-reference#app-setup"
-    default: "{}"
-    required: false
+  fury_auth:
+    description: "Used for Overrides for app-setup https://devcenter.heroku.com/articles/platform-api-reference#app-setup"
+    required: true
 outputs:
   url:
     description: "The URL for the app"
@@ -104,14 +103,15 @@ runs:
       shell: bash
       run: |
         export SOURCE_GET_URL=$(echo ${{ toJSON(steps.source_endpoint.outputs.SOURCE_ENDPOINT) }} | jq -r '.get')
-        curl -v -X POST https://api.heroku.com/app-setups \
+        curl -X POST https://api.heroku.com/app-setups \
         -d '{
         "source_blob": {"url": "'"$SOURCE_GET_URL"'", "version": "'"${{ github.event.pull_request.head.sha }}"'"},
         "app": {
           "name": "'"$APP_NAME"'",
           "region": "${{ inputs.region }}",
           "organization": "${{ inputs.team }}"
-        },"overrides": "'"${{ inputs.overrides }}"'"
+        },
+        "overrides": {"env": {"FURY_AUTH": "${{ inputs.fury_auth }}"}}
         }' \
         -H "Content-Type: application/json" \
         -H "Accept: application/vnd.heroku+json; version=3" \
