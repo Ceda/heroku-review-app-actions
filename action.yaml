@@ -20,6 +20,9 @@ inputs:
     description: "Heroku stack to deploy to e.g heroku-18. Default: heroku-20"
     default: "heroku-20"
     required: false
+  team:
+    description: "The Heroku team the app belongs to."
+    required: false
   use-app-json:
     description: "Set up the initial build using app.json. For more info: https://devcenter.heroku.com/articles/setting-up-apps-using-the-heroku-platform-api"
     default: false
@@ -78,6 +81,14 @@ runs:
     - name: Create App
       if: ${{ github.event_name == 'pull_request' && (github.event.action == 'opened' || github.event.action == 'reopened') && inputs.use-app-json == 'false' }}
       shell: bash
+      env:
+        SOURCE_ENDPOINT_GET: ${{ steps.source_endpoint_env.outputs.SOURCE_ENDPOINT_GET }}
+      run: |
+        export URL=$(echo ${{ toJSON(steps.source_endpoint.outputs.SOURCE_ENDPOINT) }} | jq -r '.put')
+        curl $URL -X PUT -H 'Content-Type:' --data-binary @source.tar.gz
+    - name: Create App
+      if: ${{ github.event_name == 'pull_request' && (github.event.action == 'opened' || github.event.action == 'reopened') && inputs.use-app-json == 'false' }}
+      shell: bash
       run: |
         curl -X POST https://api.heroku.com/apps \
         -d '{
@@ -98,7 +109,8 @@ runs:
         "source_blob": {"url": "'"$SOURCE_GET_URL"'", "version": "'"${{ github.event.pull_request.head.sha }}"'"},
         "app": {
           "name": "'"$APP_NAME"'",
-          "region": "${{ inputs.region }}"
+          "region": "${{ inputs.region }}",
+          "organization": "${{ inputs.team }}"
         },"overrides": "'"${{ inputs.overrides }}"'"
         }' \
         -H "Content-Type: application/json" \
