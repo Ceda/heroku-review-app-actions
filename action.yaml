@@ -105,19 +105,20 @@ runs:
       shell: bash
       run: |
         export SOURCE_GET_URL=$(echo ${{ toJSON(steps.source_endpoint.outputs.SOURCE_ENDPOINT) }} | jq -r '.get')
-        curl -X POST https://api.heroku.com/app-setups \
-        -d '{
+        echo '{
         "source_blob": {"url": "'"$SOURCE_GET_URL"'", "version": "'"${{ github.event.pull_request.head.sha }}"'"},
         "app": {
           "name": "'"$APP_NAME"'",
           "region": "${{ inputs.region }}",
           "organization": "${{ inputs.team }}"
         },
-        "overrides": {"env": '$CONFIG_VARS'}
-        }' \
+        "overrides": {"env": '$CONFIG_VARS'}}' > /tmp/app_payload.json
+        curl -X POST https://api.heroku.com/app-setups \
+        -d @/tmp/app_payload.json \
         -H "Content-Type: application/json" \
         -H "Accept: application/vnd.heroku+json; version=3" \
         -H "Authorization: Bearer ${{ inputs.api-key }}"
+        rm /tmp/app_payload.json
     - name: Update Pipeline
       if: ${{ github.event_name == 'pull_request' && (github.event.action == 'opened' || github.event.action == 'reopened') }}
       shell: bash
