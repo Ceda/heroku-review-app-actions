@@ -78,10 +78,10 @@ runs:
       if: ${{ github.event_name == 'pull_request' && (github.event.action == 'opened' || github.event.action == 'reopened') }}
       shell: bash
       run: |
-        echo ::set-output name=CONFIG_VARS::$(curl -n https://api.heroku.com/pipelines/${{ inputs.pipeline-id }}/stage/review/config-vars \
+        echo ::set-output name=CONFIG_VARS::"$(curl -n https://api.heroku.com/pipelines/${{ inputs.pipeline-id }}/stage/review/config-vars \
         -H "Content-Type: application/json" \
         -H "Accept: application/vnd.heroku+json; version=3" \
-        -H "Authorization: Bearer ${{ inputs.api-key }})
+        -H "Authorization: Bearer ${{ inputs.api-key }})"
     - name: Create App
       if: ${{ github.event_name == 'pull_request' && (github.event.action == 'opened' || github.event.action == 'reopened') && inputs.use-app-json == 'false' }}
       shell: bash
