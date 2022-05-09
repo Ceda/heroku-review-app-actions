@@ -75,7 +75,7 @@ runs:
         export URL=$(echo ${{ toJSON(steps.source_endpoint.outputs.SOURCE_ENDPOINT) }} | jq -r '.put')
         curl $URL -X PUT -H 'Content-Type:' --data-binary @source.tar.gz
     - name: Fetch Config
-      if: ${{ github.event_name == 'pull_request' && (github.event.action == 'opened' || github.event.action == 'reopened')
+      if: ${{ github.event_name == 'pull_request' && (github.event.action == 'opened' || github.event.action == 'reopened') }}
       shell: bash
       run: |
         echo ::set-output name=CONFIG_VARS::$(curl -n https://api.heroku.com/pipelines/${{ inputs.pipeline-id }}/stage/review/config-vars \
