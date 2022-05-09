@@ -113,7 +113,7 @@ runs:
           "region": "${{ inputs.region }}",
           "organization": "${{ inputs.team }}"
         },
-        "overrides": {"env": $CONFIG_VARS}
+        "overrides": {"env": '$CONFIG_VARS'}
         }' \
         -H "Content-Type: application/json" \
         -H "Accept: application/vnd.heroku+json; version=3" \
