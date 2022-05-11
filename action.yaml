@@ -23,6 +23,9 @@ inputs:
   team:
     description: "The Heroku team the app belongs to."
     required: false
+  heroku-email:
+    description: "Heroku email for pushing updates."
+    required: true
   use-app-json:
     description: "Set up the initial build using app.json. For more info: https://devcenter.heroku.com/articles/setting-up-apps-using-the-heroku-platform-api"
     default: false
@@ -74,8 +77,8 @@ runs:
       run: |
         export URL=$(echo ${{ toJSON(steps.source_endpoint.outputs.SOURCE_ENDPOINT) }} | jq -r '.put')
         curl $URL -X PUT -H 'Content-Type:' --data-binary @source.tar.gz
-    - name: "Create / Update App"
-      if: ${{ github.event_name == 'pull_request' && (github.event.action == 'opened' || github.event.action == 'reopened' || github.event.action == 'synchronize') && inputs.use-app-json == 'true' }}
+    - name: "Create App"
+      if: ${{ github.event_name == 'pull_request' && (github.event.action == 'opened' || github.event.action == 'reopened') && inputs.use-app-json == 'true' }}
       shell: bash
       run: |
         export SOURCE_GET_URL=$(echo ${{ toJSON(steps.source_endpoint.outputs.SOURCE_ENDPOINT) }} | jq -r '.get')
@@ -110,6 +113,17 @@ runs:
         -H "Content-Type: application/json" \
         -H "Accept: application/vnd.heroku+json; version=3" \
         -H "Authorization: Bearer ${{ inputs.api-key }}"
+    - name: "Update App"
+      if: ${{ github.event_name == 'pull_request' &&  github.event.action == 'synchronize'}}
+      - uses: akhileshns/heroku-deploy@v3.12.12
+        with:
+          heroku_api_key: ${{ inputs.api-key }}
+          heroku_app_name: $APP_NAME
+          heroku_email: ${{ inputs.heroku-email }}
+          dontautocreate: true
+          region: ${{ inputs.region }}
+          team: ${{ inputs.team }}
+          dontuseforce: true
     - name: Set Output:url
       id: output-url
       shell: bash
