@@ -115,15 +115,15 @@ runs:
         -H "Authorization: Bearer ${{ inputs.api-key }}"
     - name: "Update App"
       if: ${{ github.event_name == 'pull_request' &&  github.event.action == 'synchronize'}}
-      - uses: akhileshns/heroku-deploy@v3.12.12
-        with:
-          heroku_api_key: ${{ inputs.api-key }}
-          heroku_app_name: $APP_NAME
-          heroku_email: ${{ inputs.heroku-email }}
-          dontautocreate: true
-          region: ${{ inputs.region }}
-          team: ${{ inputs.team }}
-          dontuseforce: true
+      uses: akhileshns/heroku-deploy@v3.12.12
+      with:
+        heroku_api_key: ${{ inputs.api-key }}
+        heroku_app_name: $APP_NAME
+        heroku_email: ${{ inputs.heroku-email }}
+        dontautocreate: true
+        region: ${{ inputs.region }}
+        team: ${{ inputs.team }}
+        dontuseforce: true
     - name: Set Output:url
       id: output-url
       shell: bash
