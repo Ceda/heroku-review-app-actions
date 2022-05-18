@@ -18,10 +18,7 @@ inputs:
     required: false
   stack:
     description: "Heroku stack to deploy to e.g heroku-18. Default: heroku-20"
-    default: "heroku-20"
-    required: false
-  team:
-    description: "The Heroku team the app belongs to."
+    default: "heroku-18"
     required: false
   heroku-email:
     description: "Heroku email for pushing updates."
@@ -90,8 +87,7 @@ runs:
         "source_blob": {"url": "'"$SOURCE_GET_URL"'", "version": "'"${{ github.event.pull_request.head.sha }}"'"},
         "app": {
           "name": "'"$APP_NAME"'",
-          "region": "${{ inputs.region }}",
-          "organization": "${{ inputs.team }}"
+          "region": "${{ inputs.region }}"
         },
         "overrides": {"env": '$CONFIG_VARS'}}' > /tmp/app_payload.json
         curl -X POST https://api.heroku.com/app-setups \
@@ -122,7 +118,6 @@ runs:
         heroku_email: ${{ inputs.heroku-email }}
         dontautocreate: true
         region: ${{ inputs.region }}
-        team: ${{ inputs.team }}
         dontuseforce: true
     - name: Set Output:url
       id: output-url
